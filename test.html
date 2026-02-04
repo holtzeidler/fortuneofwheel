@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+        canvas { border: 2px solid #333; margin: 20px; }
+        button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+        .debug { position: fixed; top: 10px; right: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Wheel Test</h1>
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+    <br>
+    <button id="spinButton">SPIN!</button>
+    <button id="resetButton">Reset</button>
+    <div id="result"></div>
+    
+    <div class="debug">
+        <button onclick="debugWheel()">Debug</button>
+    </div>
+
+    <script>
+        class SimpleWheel {
+            constructor() {
+                this.canvas = document.getElementById('wheelCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.currentRotation = 0;
+                this.targetRotation = 0;
+                this.isSpinning = false;
+                this.letterPositions = [];
+                
+                this.drawWheel();
+                this.setupEventListeners();
+            }
+            
+            drawWheel() {
+                const centerX = this.canvas.width / 2;
+                const centerY = this.canvas.height / 2;
+                const radius = Math.min(centerX, centerY) - 20;
+                
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                const anglePerSegment = 360 / 26;
+                
+                this.letterPositions = [];
+                
+                letters.forEach((letter, index) => {
+                    const startAngle = (index * anglePerSegment + this.currentRotation) * Math.PI / 180;
+                    const endAngle = ((index + 1) * anglePerSegment + this.currentRotation) * Math.PI / 180;
+                    
+                    this.letterPositions.push({
+                        letter: letter,
+                        centerAngle: index * anglePerSegment + anglePerSegment / 2 + this.currentRotation
+                    });
+                    
+                    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+                    const color = colors[index % colors.length];
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(centerX, centerY);
+                    this.ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                    this.ctx.closePath();
+                    this.ctx.fillStyle = color;
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#fff';
+                    this.ctx.stroke();
+                    this.ctx.lineWidth = 2;
+                    
+                    this.ctx.save();
+                    this.ctx.translate(centerX, centerY);
+                    this.ctx.rotate(startAngle + (endAngle - startAngle) / 2);
+                    this.ctx.textAlign = 'center';
+                    this.ctx.fillStyle = '#fff';
+                    this.ctx.font = 'bold 18px Poppins';
+                    this.ctx.fillText(letter, radius * 0.7, 6);
+                    this.ctx.restore();
+                });
+            }
+            
+            spinWheel() {
+                if (this.isSpinning) return;
+                
+                this.isSpinning = true;
+                document.getElementById('spinButton').disabled = true;
+                document.getElementById('spinButton').textContent = 'Spinning...';
+                
+                const spins = 4 + Math.random() * 6;
+                const extraDegrees = Math.random() * 360;
+                const totalDegrees = spins * 360 + extraDegrees;
+                
+                this.targetRotation = this.currentRotation + totalDegrees;
+                
+                const startTime = performance.now();
+                const duration = 2500;
+                
+                const animate = (currentTime) => {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    this.currentRotation = this.currentRotation + (totalDegrees * easeOut - this.currentRotation + this.targetRotation - totalDegrees) * 0.1;
+                    
+                    this.drawWheel();
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        this.finishSpin();
+                    }
+                };
+                
+                requestAnimationFrame(animate);
+            }
+            
+            finishSpin() {
+                this.isSpinning = false;
+                document.getElementById('spinButton').disabled = false;
+                document.getElementById('spinButton').textContent = 'SPIN!';
+                
+                const normalizedRotation = (this.currentRotation % 360 + 360) % 360;
+                let selectedLetter = null;
+                let minAngleDiff = 360;
+                
+                this.letterPositions.forEach(({letter, centerAngle}) => {
+                    const normalizedCenterAngle = (centerAngle % 360 + 360) % 360;
+                    const angleDiff = Math.abs(normalizedCenterAngle - normalizedRotation);
+                    const adjustedAngleDiff = Math.min(angleDiff, 360 - angleDiff);
+                    
+                    if (adjustedAngleDiff < minAngleDiff) {
+                        minAngleDiff = adjustedAngleDiff;
+                        selectedLetter = letter;
+                    }
+                });
+                
+                document.getElementById('result').textContent = `Selected: ${selectedLetter} (Angle: ${normalizedRotation.toFixed(1)}°)`;
+            }
+            
+            setupEventListeners() {
+                document.getElementById('spinButton').addEventListener('click', () => this.spinWheel());
+                document.getElementById('resetButton').addEventListener('click', () => {
+                    this.currentRotation = 0;
+                    this.drawWheel();
+                    document.getElementById('result').textContent = '';
+                });
+            }
+        }
+        
+        function debugWheel() {
+            console.log('=== SIMPLE WHEEL DEBUG ===');
+            console.log('Current Rotation:', wheel.currentRotation);
+            console.log('Target Rotation:', wheel.targetRotation);
+            console.log('Normalized Rotation:', (wheel.currentRotation % 360 + 360) % 360);
+            console.log('Letter Positions:', wheel.letterPositions);
+            console.log('========================');
+        }
+        
+        let wheel;
+        document.addEventListener('DOMContentLoaded', () => {
+            wheel = new SimpleWheel();
+        });
+    </script>
+</body>
+</html>
+

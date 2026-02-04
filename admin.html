@@ -1,0 +1,112 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune - Admin Panel</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔧 Wheel of Fortune - Admin Panel</h1>
+            <p>Manage your game phrases and control the game</p>
+        </header>
+
+        <div class="admin-content">
+            <div class="phrase-management">
+                <h3>Phrase Management</h3>
+                <div class="input-group">
+                    <input type="text" id="wordInput" placeholder="Enter a phrase (max 14 characters)" maxlength="14">
+                    <button id="addWordBtn" class="add-btn">Add Phrase</button>
+                </div>
+                <div class="word-list">
+                    <h4>Current Phrases:</h4>
+                    <div id="wordList" class="word-items"></div>
+                </div>
+                <div class="admin-buttons">
+                    <button id="clearAllBtn" class="clear-btn">Clear All</button>
+                    <button id="newGameBtn" class="new-game-btn">New Game</button>
+                    <button id="saveToStorageBtn" class="save-btn">Save to Storage</button>
+                    <button id="loadFromStorageBtn" class="load-btn">Load from Storage</button>
+                    <button id="clearStorageBtn" class="clear-storage-btn">🧹 Clear All Storage</button>
+                </div>
+            </div>
+
+            <div class="word-reveal-control">
+                <h3>Word Reveal Control</h3>
+                <div class="reveal-table-container">
+                    <table id="wordRevealTable" class="word-reveal-table">
+                        <thead>
+                            <tr>
+                                <th>Row</th>
+                                <th>Word</th>
+                                <th>Position</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="wordRevealTableBody">
+                            <!-- Words will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="reveal-status" id="revealStatus">
+                    Click the reveal button next to any word to reveal it on the game board
+                </div>
+            </div>
+
+            <div class="game-status">
+                <h3>Game Status</h3>
+                <div id="gameStatus" class="status-display">
+                    Game not started
+                </div>
+                <div class="status-actions">
+                    <button id="resetGameBtn" class="reset-btn">Reset Game</button>
+                    <button id="openGameBtn" class="open-game-btn">Open Game in New Tab</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>Admin Instructions:</h3>
+            <ol>
+                <li><strong>Add Phrases:</strong> Enter up to 4 phrases (max 14 characters each)</li>
+                <li><strong>Save/Load:</strong> Save your phrases to browser storage for future use</li>
+                <li><strong>New Game:</strong> Reset the game board with the same phrases</li>
+                <li><strong>Word Reveal:</strong> Reveal specific words if players are stuck</li>
+                <li><strong>Game Control:</strong> Open the game in a new tab to share with players</li>
+                <li><strong>Clear Storage:</strong> Use "Clear All Storage" when you need to reset everything</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Storage management script - only clears when needed -->
+    <script>
+        // Check if this is a fresh deployment by looking for a version marker
+        (function() {
+            const currentVersion = '1.0.0'; // Change this when you deploy new code
+            const storedVersion = localStorage.getItem('wheelOfFortuneVersion');
+            
+            if (storedVersion !== currentVersion) {
+                console.log('🚀 Admin: New deployment detected - clearing old storage...');
+                
+                // Clear all storage for new deployment
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Set the new version marker
+                localStorage.setItem('wheelOfFortuneVersion', currentVersion);
+                
+                console.log('✅ Storage cleared for new deployment version:', currentVersion);
+            } else {
+                console.log('✅ Admin: Same version detected - keeping existing storage');
+            }
+        })();
+    </script>
+
+    <script src="admin.js"></script>
+</body>
+</html>

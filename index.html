@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wheel of Fortune Game</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="top-section">
+            <div class="left-column">
+                <header>
+                    <div class="header-content">
+                        <div class="header-left">
+                            <h1>🎡 Wheel of Fortune</h1>
+                            <p>Spin the wheel and reveal the hidden phrases!</p>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="wheel-container">
+                    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+                    <div class="wheel-center">
+                        <button id="spinButton" class="spin-btn">SPIN!</button>
+                    </div>
+                    <div class="pointer"></div>
+                </div>
+            </div>
+
+            <div class="right-column">
+                <div class="game-board">
+                    <h3>Game Board</h3>
+                    <div class="phrase-rows">
+                        <div class="phrase-row" id="row1">
+                            <!-- 12 blocks for first row -->
+                        </div>
+                        <div class="phrase-row" id="row2">
+                            <!-- 14 blocks for second row -->
+                        </div>
+                        <div class="phrase-row" id="row3">
+                            <!-- 14 blocks for third row -->
+                        </div>
+                        <div class="phrase-row" id="row4">
+                            <!-- 14 blocks for fourth row -->
+                        </div>
+                        <div class="phrase-row" id="row5">
+                            <!-- 14 blocks for fifth row -->
+                        </div>
+                        <div class="phrase-row" id="row6">
+                            <!-- 14 blocks for sixth row -->
+                        </div>
+                        <div class="phrase-row" id="row7">
+                            <!-- 14 blocks for seventh row -->
+                        </div>
+                        <div class="phrase-row" id="row8">
+                            <!-- 12 blocks for eighth row -->
+                        </div>
+                    </div>
+                    
+                    <div class="game-info">
+                        <div class="current-letter" id="currentLetter">Spin to reveal letters!</div>
+                        <div class="revealed-count" id="revealedCount">Letters revealed: 0</div>
+                    </div>
+                </div>
+
+                <div class="alphabet-tracker">
+                    <h3>Letters Spun</h3>
+                    <div class="alphabet-grid" id="alphabetGrid">
+                        <!-- Alphabet will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="instructions">
+            <h3>How to Play:</h3>
+            <ol>
+                <li>Use the Admin Panel to set up your phrases</li>
+                <li>Click "SPIN!" to rotate the wheel and land on a letter</li>
+                <li>All instances of that letter will be revealed on the board</li>
+                <li>Try to solve the phrases before all letters are revealed!</li>
+                <li>Use "New Game" in Admin Panel to reset with the same phrases</li>
+            </ol>
+        </div>
+    </div>
+
+    <!-- Storage management script - only clears when needed -->
+    <script>
+        // Check if this is a fresh deployment by looking for a version marker
+        (function() {
+            const currentVersion = '1.0.2'; // Change this when you deploy new code
+            const storedVersion = localStorage.getItem('wheelOfFortuneVersion');
+            
+            if (storedVersion !== currentVersion) {
+                console.log('🚀 New deployment detected - clearing old storage...');
+                
+                // Clear all storage for new deployment
+                localStorage.clear();
+                sessionStorage.clear();
+                
+                // Set the new version marker
+                localStorage.setItem('wheelOfFortuneVersion', currentVersion);
+                
+                console.log('✅ Storage cleared for new deployment version:', currentVersion);
+            } else {
+                console.log('✅ Same version detected - keeping existing storage');
+            }
+        })();
+    </script>
+
+    <script src="script.js?v=1.0.2"></script>
+    <script src="debug.js?v=1.0.2"></script>
+</body>
+</html>
