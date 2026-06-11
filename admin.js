@@ -1,10 +1,11 @@
 class WheelOfFortuneAdmin {
     constructor() {
         this.phrases = [];
-        this.rowLengths = [14, 16, 16, 16, 16, 16, 16, 16, 14];
+        this.rowLengths = [13, 15, 15, 15, 15, 15, 15, 15, 13];
         this.initializeEventListeners();
         this.createAlphabetGrid();
         this.updateGameStatus();
+        this.configurePhraseInput();
         
         // Load any existing phrases from storage
         this.loadFromStorage();
@@ -72,12 +73,40 @@ class WheelOfFortuneAdmin {
         document.getElementById('clearStorageBtn').addEventListener('click', () => this.clearAllStorage());
     }
 
+    getMaxPhraseLength() {
+        return Math.max(...this.rowLengths) - 2;
+    }
+
+    getMaxWordsInRow(rowIndex) {
+        const rowLength = this.rowLengths[rowIndex];
+        if (rowLength < 3) return 0;
+        // Minimum layout with 1-char words: [buf]W[buf] then each extra word adds W[buf] (2 blocks)
+        return 1 + Math.floor((rowLength - 3) / 2);
+    }
+
+    getRequiredBlocksForNewWord(rowIndex, phraseLength) {
+        const isFirstWord = this.getWordsInRow(rowIndex).length === 0;
+        return isFirstWord ? phraseLength + 2 : phraseLength + 1;
+    }
+
+    getAvailableBlocksInRow(rowIndex) {
+        return this.rowLengths[rowIndex] - this.getUsedBlocksInRow(rowIndex);
+    }
+
+    configurePhraseInput() {
+        const input = document.getElementById('wordInput');
+        const maxLength = this.getMaxPhraseLength();
+        input.maxLength = maxLength;
+        input.placeholder = `Enter a phrase (max ${maxLength} characters)`;
+    }
+
     updateSpaceInfo() {
         const input = document.getElementById('wordInput');
         const phrase = input.value.trim().toUpperCase();
+        const maxLength = this.getMaxPhraseLength();
         
         if (!phrase) {
-            input.placeholder = 'Enter a phrase (max 16 characters)';
+            input.placeholder = `Enter a phrase (max ${maxLength} characters)`;
             return;
         }
         
@@ -87,13 +116,9 @@ class WheelOfFortuneAdmin {
         const placementOptions = [];
         
         for (let rowIndex = 0; rowIndex < this.rowLengths.length; rowIndex++) {
-            const rowLength = this.rowLengths[rowIndex];
-            const usedBlocks = this.getUsedBlocksInRow(rowIndex);
+            const requiredBlocks = this.getRequiredBlocksForNewWord(rowIndex, phraseLength);
+            const availableBlocks = this.getAvailableBlocksInRow(rowIndex);
             const wordsInRow = this.getWordsInRow(rowIndex).length;
-            
-            // Calculate required blocks: if this would be the first word, need +2, otherwise +1 (shared buffer)
-            const requiredBlocks = wordsInRow === 0 ? phraseLength + 2 : phraseLength + 1;
-            const availableBlocks = rowLength - usedBlocks;
             
             if (availableBlocks >= requiredBlocks) {
                 placementOptions.push({
@@ -101,7 +126,7 @@ class WheelOfFortuneAdmin {
                     availableBlocks: availableBlocks,
                     wordsInRow: wordsInRow,
                     requiredBlocks: requiredBlocks,
-                    efficiency: availableBlocks - requiredBlocks // Lower is better (less wasted space)
+                    efficiency: availableBlocks - requiredBlocks
                 });
             }
         }
@@ -118,28 +143,25 @@ class WheelOfFortuneAdmin {
             const bestOption = placementOptions[0];
             const remainingBlocks = bestOption.availableBlocks - bestOption.requiredBlocks;
             const wordCount = bestOption.wordsInRow + 1;
+            const maxWords = this.getMaxWordsInRow(bestOption.row);
             
             let placeholder = `Best: Row ${bestOption.row + 1} (${bestOption.requiredBlocks} blocks needed)`;
             if (remainingBlocks > 0) {
                 placeholder += ` - ${remainingBlocks} blocks left`;
             }
-            if (wordCount > 1) {
-                placeholder += ` - ${wordCount} words in row`;
-            }
+            placeholder += ` - ${wordCount}/${maxWords} words in row`;
             
             input.placeholder = placeholder;
         } else {
-            input.placeholder = `Too long! Need ${phraseLength + 1} blocks, max available is ${this.getMaxAvailableBlocks()}`;
+            const minRequired = this.getRequiredBlocksForNewWord(0, phraseLength);
+            input.placeholder = `Too long! Need ${minRequired} blocks, max available is ${this.getMaxAvailableBlocks()}`;
         }
     }
 
     getMaxAvailableBlocks() {
         let maxAvailable = 0;
         for (let rowIndex = 0; rowIndex < this.rowLengths.length; rowIndex++) {
-            const rowLength = this.rowLengths[rowIndex];
-            const usedBlocks = this.getUsedBlocksInRow(rowIndex);
-            const availableBlocks = rowLength - usedBlocks;
-            maxAvailable = Math.max(maxAvailable, availableBlocks);
+            maxAvailable = Math.max(maxAvailable, this.getAvailableBlocksInRow(rowIndex));
         }
         return maxAvailable;
     }
@@ -162,8 +184,9 @@ class WheelOfFortuneAdmin {
             return;
         }
         
-        if (phrase.length > 16) {
-            alert('Phrase must be 16 characters or less!');
+        const maxLength = this.getMaxPhraseLength();
+        if (phrase.length > maxLength) {
+            alert(`Phrase must be ${maxLength} characters or less!`);
             return;
         }
         
@@ -183,7 +206,7 @@ class WheelOfFortuneAdmin {
         
         this.addPhraseToList(phrase, canFit.row, canFit.position);
         input.value = '';
-        input.placeholder = 'Enter a phrase (max 16 characters)';
+        this.configurePhraseInput();
         this.updateWordRevealTable();
         this.updateGameStatus();
         this.updateSpaceInfo();
@@ -193,17 +216,12 @@ class WheelOfFortuneAdmin {
     canPhraseFit(phrase) {
         const phraseLength = phrase.length;
         
-        // Find all possible placement options
         const placementOptions = [];
         
         for (let rowIndex = 0; rowIndex < this.rowLengths.length; rowIndex++) {
-            const rowLength = this.rowLengths[rowIndex];
-            const usedBlocks = this.getUsedBlocksInRow(rowIndex);
+            const requiredBlocks = this.getRequiredBlocksForNewWord(rowIndex, phraseLength);
+            const availableBlocks = this.getAvailableBlocksInRow(rowIndex);
             const wordsInRow = this.getWordsInRow(rowIndex).length;
-            
-            // Calculate required blocks: if this would be the first word, need +2, otherwise +1 (shared buffer)
-            const requiredBlocks = wordsInRow === 0 ? phraseLength + 2 : phraseLength + 1;
-            const availableBlocks = rowLength - usedBlocks;
             
             if (availableBlocks >= requiredBlocks) {
                 placementOptions.push({
@@ -211,13 +229,12 @@ class WheelOfFortuneAdmin {
                     availableBlocks: availableBlocks,
                     wordsInRow: wordsInRow,
                     requiredBlocks: requiredBlocks,
-                    efficiency: availableBlocks - requiredBlocks // Lower is better (less wasted space)
+                    efficiency: availableBlocks - requiredBlocks
                 });
             }
         }
         
         if (placementOptions.length > 0) {
-            // Sort by efficiency (least wasted space first), then by number of words in row
             placementOptions.sort((a, b) => {
                 if (a.efficiency !== b.efficiency) {
                     return a.efficiency - b.efficiency;
@@ -227,18 +244,20 @@ class WheelOfFortuneAdmin {
             
             const bestOption = placementOptions[0];
             const wordCount = bestOption.wordsInRow + 1;
+            const maxWords = this.getMaxWordsInRow(bestOption.row);
             
             return {
                 canFit: true,
                 row: bestOption.row,
                 position: this.getNextPositionInRow(bestOption.row),
-                reason: `Fits in row ${bestOption.row + 1} (${wordCount} words in row)`
+                reason: `Fits in row ${bestOption.row + 1} (${wordCount}/${maxWords} words in row)`
             };
         }
         
+        const minRequired = this.getRequiredBlocksForNewWord(0, phraseLength);
         return {
             canFit: false,
-            reason: `No row has enough space. Need ${phraseLength + (this.phrases.some(p => p.row === 0) ? 1 : 2)} blocks (${phraseLength} for phrase + buffer)`
+            reason: `No row has enough space. Need ${minRequired} blocks (${phraseLength} for phrase + buffer blocks)`
         };
     }
 
@@ -298,10 +317,11 @@ class WheelOfFortuneAdmin {
         const rowLength = this.rowLengths[row];
         const usedBlocks = this.getUsedBlocksInRow(row);
         const availableBlocks = rowLength - usedBlocks;
+        const maxWords = this.getMaxWordsInRow(row);
         
         wordItem.innerHTML = `
             <span>${phrase} (Row ${row + 1}, Pos ${position + 1})</span>
-            <span class="row-info">${wordsInRow} word${wordsInRow > 1 ? 's' : ''}, ${availableBlocks} blocks left</span>
+            <span class="row-info">${wordsInRow}/${maxWords} words, ${availableBlocks} blocks left</span>
             <button class="remove-word" onclick="admin.removePhrase('${phrase}')">×</button>
         `;
         wordList.appendChild(wordItem);
@@ -500,18 +520,15 @@ class WheelOfFortuneAdmin {
         } else {
             const totalLetters = this.phrases.reduce((sum, phrase) => sum + phrase.text.replace(/\s/g, '').length, 0);
             
-            // Add row usage summary
             let rowSummary = '';
             for (let i = 0; i < this.rowLengths.length; i++) {
                 const wordsInRow = this.getWordsInRow(i).length;
                 const usedBlocks = this.getUsedBlocksInRow(i);
                 const totalBlocks = this.rowLengths[i];
-                const availableBlocks = totalBlocks - usedBlocks;
+                const maxWords = this.getMaxWordsInRow(i);
                 
-                if (wordsInRow > 0) {
-                    rowSummary += `Row ${i + 1}: ${wordsInRow} word${wordsInRow > 1 ? 's' : ''} (${usedBlocks}/${totalBlocks} blocks)`;
-                    if (i < this.rowLengths.length - 1) rowSummary += ' | ';
-                }
+                rowSummary += `Row ${i + 1}: ${wordsInRow}/${maxWords} words (${usedBlocks}/${totalBlocks} blocks)`;
+                if (i < this.rowLengths.length - 1) rowSummary += ' | ';
             }
             
             status.innerHTML = `

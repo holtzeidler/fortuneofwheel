@@ -8,7 +8,7 @@ class WheelOfFortune {
         this.targetRotation = 0;
         this.revealedLetters = new Set();
         this.gameBoard = {};
-        this.rowLengths = [14, 16, 16, 16, 16, 16, 16, 16, 14];
+        this.rowLengths = [13, 15, 15, 15, 15, 15, 15, 15, 13];
         this.spunLetters = new Set();
         this.letterInstances = new Map();
         this.lastSpunLetter = null;
@@ -426,21 +426,20 @@ class WheelOfFortune {
             row.appendChild(endBuffer);
         });
         
-        // Fill remaining blocks with unused blocks
-        this.phrases.forEach((phraseData, phraseIndex) => {
-            const rowNum = phraseData.row + 1;
+        // Fill remaining blocks with unused blocks (once per row)
+        for (let rowIndex = 0; rowIndex < this.rowLengths.length; rowIndex++) {
+            const rowNum = rowIndex + 1;
             const row = document.getElementById(`row${rowNum}`);
-            const rowLength = this.rowLengths[phraseData.row];
-            const currentBlocks = row.children.length;
-            const remainingBlocks = rowLength - currentBlocks;
-            
+            const rowLength = this.rowLengths[rowIndex];
+            const remainingBlocks = rowLength - row.children.length;
+
             for (let i = 0; i < remainingBlocks; i++) {
                 const block = document.createElement('div');
                 block.className = 'letter-block unused';
                 block.textContent = '';
                 row.appendChild(block);
             }
-        });
+        }
     }
 
     drawWheel() {
