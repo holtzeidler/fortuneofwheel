@@ -8,7 +8,7 @@ class WheelOfFortune {
         this.targetRotation = 0;
         this.revealedLetters = new Set();
         this.gameBoard = {};
-        this.rowLengths = [12, 14, 14, 14, 14, 14, 14, 14, 12];
+        this.rowLengths = [13, 15, 15, 15, 15, 15, 15, 15, 13];
         this.spunLetters = new Set();
         this.letterInstances = new Map();
         this.lastSpunLetter = null;
