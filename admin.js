@@ -1,7 +1,7 @@
 class WheelOfFortuneAdmin {
     constructor() {
         this.phrases = [];
-        this.rowLengths = [13, 15, 15, 15, 15, 15, 15, 15, 13];
+        this.rowLengths = [14, 16, 16, 16, 16, 16, 16, 16, 14];
         this.initializeEventListeners();
         this.createAlphabetGrid();
         this.updateGameStatus();
@@ -77,7 +77,7 @@ class WheelOfFortuneAdmin {
         const phrase = input.value.trim().toUpperCase();
         
         if (!phrase) {
-            input.placeholder = 'Enter a phrase (max 15 characters)';
+            input.placeholder = 'Enter a phrase (max 16 characters)';
             return;
         }
         
@@ -162,8 +162,8 @@ class WheelOfFortuneAdmin {
             return;
         }
         
-        if (phrase.length > 15) {
-            alert('Phrase must be 15 characters or less!');
+        if (phrase.length > 16) {
+            alert('Phrase must be 16 characters or less!');
             return;
         }
         
@@ -183,7 +183,7 @@ class WheelOfFortuneAdmin {
         
         this.addPhraseToList(phrase, canFit.row, canFit.position);
         input.value = '';
-        input.placeholder = 'Enter a phrase (max 15 characters)';
+        input.placeholder = 'Enter a phrase (max 16 characters)';
         this.updateWordRevealTable();
         this.updateGameStatus();
         this.updateSpaceInfo();
