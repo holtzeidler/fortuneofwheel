@@ -1,7 +1,7 @@
 class WheelOfFortuneAdmin {
     constructor() {
         this.phrases = [];
-        this.rowLengths = [12, 14, 14, 14, 14, 14, 14, 12];
+        this.rowLengths = [12, 14, 14, 14, 14, 14, 14, 14, 12];
         this.initializeEventListeners();
         this.createAlphabetGrid();
         this.updateGameStatus();

@@ -8,7 +8,7 @@ class WheelOfFortune {
         this.targetRotation = 0;
         this.revealedLetters = new Set();
         this.gameBoard = {};
-        this.rowLengths = [12, 14, 14, 14, 14, 14, 14, 12];
+        this.rowLengths = [12, 14, 14, 14, 14, 14, 14, 14, 12];
         this.spunLetters = new Set();
         this.letterInstances = new Map();
         this.lastSpunLetter = null;
@@ -332,7 +332,7 @@ class WheelOfFortune {
         this.gameBoard = {};
         this.letterInstances.clear();
         
-        for (let i = 1; i <= 8; i++) {
+        for (let i = 1; i <= this.rowLengths.length; i++) {
             const row = document.getElementById(`row${i}`);
             row.innerHTML = '';
         }
@@ -726,7 +726,7 @@ class WheelOfFortune {
             let hasHiddenInstance = false;
             
             // Check all rows for hidden instances of this letter
-            for (let rowNum = 1; rowNum <= 8; rowNum++) {
+            for (let rowNum = 1; rowNum <= this.rowLengths.length; rowNum++) {
                 const row = document.getElementById(`row${rowNum}`);
                 if (!row) continue;
                 
@@ -793,7 +793,7 @@ class WheelOfFortune {
         // Returns true if the letter has no hidden instances, false otherwise
         
         // Check all rows for any hidden instances of this letter
-        for (let rowNum = 1; rowNum <= 8; rowNum++) {
+        for (let rowNum = 1; rowNum <= this.rowLengths.length; rowNum++) {
             const row = document.getElementById(`row${rowNum}`);
             if (!row) continue;
             
